@@ -1,77 +1,76 @@
 clc;
 clear;
 tic;
-SamNum=48;                         %ÑµÁ·Ñù±¾Êý
-TargetSamNum=3;                   %²âÊÔÑù±¾Êý
-InDim=1;                            %Ñù±¾ÊäÈëÎ¬Êý
-UnitNum=2;                          %Òþ½ÚµãÊý
-MaxEpoch=1200;                      %×î´óÑµÁ·´ÎÊý
-num=2;%¶ÔÓ¦ËÄ¸öÌØÕ÷
-%E0=0.2;                             %Ä¿±êÎó²î
+SamNum=48;                         %è®­ç»ƒæ ·æœ¬æ•°
+TargetSamNum=3;                   %æµ‹è¯•æ ·æœ¬æ•°
+InDim=1;                            %æ ·æœ¬è¾“å…¥ç»´æ•°
+UnitNum=2;                          %éšèŠ‚ç‚¹æ•°
+MaxEpoch=1200;                      %æœ€å¤§è®­ç»ƒæ¬¡æ•°
+num=2;%å¯¹åº”å››ä¸ªç‰¹å¾ï¼Œ1/2/3/4åˆ†åˆ«è¡¨ç¤ºé¢„æµ‹å¯¹åº”ç‰¹å¾
+%E0=0.2;                             %ç›®æ ‡è¯¯å·®
 gbesthistory=[];
-% ¸ù¾ÝÄ¿±êº¯Êý»ñµÃÑù±¾ÊäÈëÊä³ö£¨ÑµÁ·Ñù±¾£©
+% æ ¹æ®ç›®æ ‡å‡½æ•°èŽ·å¾—æ ·æœ¬è¾“å…¥è¾“å‡ºï¼ˆè®­ç»ƒæ ·æœ¬ï¼‰
 rand('state',sum(100*clock));
 %NoiseVar=0.0005;
 %Noise=NoiseVar*randn(1,SamNum);
 load data
-%¹éÒ»»¯
+%å½’ä¸€åŒ–
 data1=data';
 data=mapminmax(data1,0,1);
 data=data';
 
-%½¨Á¢ÑµÁ·¼¯²âÊÔ¼¯
+%å»ºç«‹è®­ç»ƒé›†æµ‹è¯•é›†
 x_train=[data(1:48,1).';data(1:48,2).';data(1:48,3).';data(1:48,4).'];
 x_test=[data(2:49,num).'];
 y_train=[data(49:51,1).';data(49:51,2).';data(49:51,3).';data(49:51,4).'];
 y_test=[data(50:52,num).'];
 SamIn=x_train;
 SamOut=x_test;
-%²âÊÔÑù±¾
+%æµ‹è¯•æ ·æœ¬
 TargetIn=y_train;
 TargetOut=y_test;
 
 
-%Á£×ÓÈºËã·¨ÖÐµÄÁ½¸ö²ÎÊý
+%ç²’å­ç¾¤ç®—æ³•ä¸­çš„ä¸¤ä¸ªå‚æ•°
 c1 = 1.49445;
 c2 = 1.49445;
-popcount=10;   %Á£×ÓÊý
-poplength=6;  %Á£×ÓÎ¬Êý
-Wstart=0.9;%³õÊ¼¹ßÐÔÈ¨Öµ
-Wend=0.2;%µü´ú´ÎÊý×î´óÊ±¹ßÐÔÈ¨Öµ
-%¸öÌåºÍËÙ¶È×î´ó×îÐ¡Öµ
+popcount=10;   %ç²’å­æ•°
+poplength=6;  %ç²’å­ç»´æ•°
+Wstart=0.9;%åˆå§‹æƒ¯æ€§æƒå€¼
+Wend=0.2;%è¿­ä»£æ¬¡æ•°æœ€å¤§æ—¶æƒ¯æ€§æƒå€¼
+%ä¸ªä½“å’Œé€Ÿåº¦æœ€å¤§æœ€å°å€¼
 Vmax=1;
 Vmin=-1;
 popmax=4;
 popmin=-4;
-%Á£×ÓÎ»ÖÃËÙ¶ÈºÍ×îÓÅÖµ³õÊ¼»¯
+%ç²’å­ä½ç½®é€Ÿåº¦å’Œæœ€ä¼˜å€¼åˆå§‹åŒ–
 
 for i=1:popcount
-    pop(i,:)=rand(1,9);%³õÊ¼»¯Á£×ÓÎ»ÖÃ
-    V(i,:)=rand(1,9);%³õÊ¼»¯Á£×ÓËÙ¶È
-    %¼ÆËãÁ£×ÓÊÊÓ¦¶ÈÖµ
+    pop(i,:)=rand(1,9);%åˆå§‹åŒ–ç²’å­ä½ç½®
+    V(i,:)=rand(1,9);%åˆå§‹åŒ–ç²’å­é€Ÿåº¦
+    %è®¡ç®—ç²’å­é€‚åº”åº¦å€¼
     Center=pop(i,1:3);
     SP=pop(i,4:6); 
     W=pop(i,7:9);
     Distance=dist(Center',SamIn);
-    SPMat=repmat(SP',1,SamNum);%repmat¾ßÌå×÷ÓÃ
-    UnitOut=radbas(Distance./SPMat);%¾¶Ïò»ùº¯Êý
-    NetOut=W*UnitOut;%ÍøÂçÊä³ö
-    Error=SamOut-NetOut;%ÍøÂçÎó²î
+    SPMat=repmat(SP',1,SamNum);%repmatå…·ä½“ä½œç”¨
+    UnitOut=radbas(Distance./SPMat);%å¾„å‘åŸºå‡½æ•°
+    NetOut=W*UnitOut;%ç½‘ç»œè¾“å‡º
+    Error=SamOut-NetOut;%ç½‘ç»œè¯¯å·®
     %SSE=sumsqr(Error);
     %fitness(i)=SSE;
     RMSE=sqrt(sumsqr(Error)/SamNum);
     fitness(i)=RMSE;
     %fitness(i)=fun(pop(i,:));
 end
-%ÊÊÓ¦¶Èº¯Êý£¨ÊÊÓ¦¶ÈÖµÎªRBFÍøÂç¾ù·½²î£©
-
+%é€‚åº”åº¦å‡½æ•°ç»Ÿä¸€ä½¿ç”¨RMSE
 
 [bestfitness bestindex]=min(fitness);
-gbest=pop(bestindex,:);%È«¾Ö×îÓÅÖµ
-pbest=pop;%¸öÌå×îÓÅÖµ
-pbestfitness=fitness;%¸öÌå×îÓÅÊÊÓ¦¶ÈÖµ
-gbestfitness=bestfitness;%È«¾Ö×îÓÅÊÊÓ¦¶ÈÖµ
-%µü´úÑ°ÓÅ
+gbest=pop(bestindex,:);%å…¨å±€æœ€ä¼˜å€¼
+pbest=pop;%ä¸ªä½“æœ€ä¼˜å€¼
+pbestfitness=fitness;%ä¸ªä½“æœ€ä¼˜é€‚åº”åº¦å€¼
+gbestfitness=bestfitness;%å…¨å±€æœ€ä¼˜é€‚åº”åº¦å€¼
+%è¿­ä»£å¯»ä¼˜
 for i=1:MaxEpoch
    Vmax=1.00014^(-i);
    Vmin=-1.00014^(-i);
@@ -83,7 +82,7 @@ for i=1:MaxEpoch
        % GW(j)=Wstart-S(j)*(Wstart-Wend);
        % GW(j)=Wend+(GW(j)-Wend)*(MaxEpoch-i)/MaxEpoch;
         GW=Wstart-(Wstart-Wend)*i/MaxEpoch;
-        %ËÙ¶È¸üÐÂ(µÚÒ»ÖÖ·½·¨¾«¶È×î¸ß)
+        %é€Ÿåº¦æ›´æ–°(ç¬¬ä¸€ç§æ–¹æ³•ç²¾åº¦æœ€é«˜)
         V(j,:) = 1.000009^(-i)*(gbestfitness/fitness(j)+2)*rand*V(j,:) + c1*rand*(pbest(j,:) - pop(j,:)) + c2*rand*(gbest - pop(j,:));
         %V(j,:) = GW*((fitness(j)/2000)^2+1)*rand*V(j,:) + c1*rand*(pbest(j,:) - pop(j,:)) + c2*rand*(gbest - pop(j,:));
         %V(j,:) = GW*V(j,:) + c1*rand*(pbest(j,:) - pop(j,:)) + c2*rand*(gbest - pop(j,:));
@@ -92,23 +91,23 @@ for i=1:MaxEpoch
         %V(j,:) = (gbestfitness/(exp(-fitness(j))+1)+0.5)*rand*V(j,:) + c1*rand*(pbest(j,:) - pop(j,:)) + c2*rand*(gbest - pop(j,:));
         V(j,find(V(j,:)>Vmax))=Vmax;
         V(j,find(V(j,:)<Vmin))=Vmin;
-        
-        %Á£×Ó¸üÐÂ
+
+        %ç²’å­æ›´æ–°
         pop(j,:)=pop(j,:)+0.5*V(j,:);
         pop(j,find(pop(j,:)>popmax))=popmax;
         pop(j,find(pop(j,:)<popmin))=popmin;
-        %¼ÆËãÁ£×ÓÊÊÓ¦¶ÈÖµ
+        %è®¡ç®—ç²’å­é€‚åº”åº¦å€¼
         Center=pop(j,1:3);
         SP=pop(j,4:6); 
         W=pop(j,7:9);
         Distance=dist(Center',SamIn);
-        SPMat=repmat(SP',1,SamNum);%repmat¾ßÌå×÷ÓÃ
+        SPMat=repmat(SP',1,SamNum);%repmatå…·ä½“ä½œç”¨
         UnitOut=radbas(Distance./SPMat);
-        NetOut=W*UnitOut;%ÍøÂçÊä³ö
-        Error=SamOut-NetOut;%ÍøÂçÎó²î
+        NetOut=W*UnitOut;%ç½‘ç»œè¾“å‡º
+        Error=SamOut-NetOut;%ç½‘ç»œè¯¯å·®
         %SSE=sumsqr(Error);
         %fitness(j)=SSE;
-        RMSE=(sumsqr(Error)/SamNum);
+        RMSE=sqrt(sumsqr(Error)/SamNum);
         fitness(j)=RMSE;
        % Center=pop(j,1:10);
        % SP=pop(j,11:20);
@@ -116,14 +115,14 @@ for i=1:MaxEpoch
        % fitness(j)=fun(pop(j,:));
     end
     for j=1:popcount
-        
-        %¸öÌå×îÓÅ¸üÐÂ
+
+        %ä¸ªä½“æœ€ä¼˜æ›´æ–°
         if fitness(j) < pbestfitness(j)
             pbest(j,:) = pop(j,:);
             pbestfitness(j) = fitness(j); 
         end
-        
-        %ÈºÌå×îÓÅ¸üÐÂ
+
+        %ç¾¤ä½“æœ€ä¼˜æ›´æ–°
         if fitness(j) < gbestfitness
             gbest = pop(j,:);
             gbestfitness = fitness(j);
@@ -131,7 +130,7 @@ for i=1:MaxEpoch
     end
     gbesthistory=[gbesthistory,gbest];
     %mse(i)=gbestfitness;
-    %½«ÈºÌå×îÓÅÖµ¸³¸øRBF²ÎÊý
+    %å°†ç¾¤ä½“æœ€ä¼˜å€¼èµ‹ç»™RBFå‚æ•°
     Center=gbest(1,1:3);
     SP=gbest(1,4:6); 
     W=gbest(1,7:9);
@@ -139,17 +138,17 @@ for i=1:MaxEpoch
     %SP=gbest(1,11:20); 
     % W=gbest(1,21:30);
      Distance=dist(Center',SamIn);
-     SPMat=repmat(SP',1,SamNum);%repmat¾ßÌå×÷ÓÃ
+     SPMat=repmat(SP',1,SamNum);%repmatå…·ä½“ä½œç”¨
      UnitOut=radbas(Distance./SPMat);
-     NetOut=W*UnitOut;%ÍøÂçÊä³ö
-     Error=SamOut-NetOut;%ÍøÂçÎó²î
+     NetOut=W*UnitOut;%ç½‘ç»œè¾“å‡º
+     Error=SamOut-NetOut;%ç½‘ç»œè¯¯å·®
      %sse(i)=sumsqr(Error);
      mse(i)=(sumsqr(Error)/SamNum);
    % sse(i)=fun(gbest);
    %if sse(i)<E0,break,end 
 end
 toc;
-% ²âÊÔ 
+% æµ‹è¯• 
 Center=gbest(1,1:3);
 SP=gbest(1,4:6); 
 W=gbest(1,7:9);
@@ -158,18 +157,18 @@ TesatSpreadsMat=repmat(SP',1,TargetSamNum);
 TestHiddenUnitOut=radbas(TestDistance./TesatSpreadsMat);
 TestNNOut=W*TestHiddenUnitOut;
 
-%×÷Í¼ ·Ö±ðÔÚÑµÁ·¼¯ºÍ²âÊÔ¼¯ÉÏ
+%ä½œå›¾ åˆ†åˆ«åœ¨è®­ç»ƒé›†å’Œæµ‹è¯•é›†ä¸Š
 subplot(1,2,1)
 plot(1:length(NetOut),NetOut,'*',1:length(NetOut),SamOut,'o')
 title('In Train data')
 subplot(1,2,2)
 plot(1:3,TestNNOut,'*',1:3,TargetOut,'o')
 title('In Test data')
-%Çó³öÎó²î ÑµÁ·¼¯ºÍ²âÊÔ¼¯
+%æ±‚å‡ºè¯¯å·® è®­ç»ƒé›†å’Œæµ‹è¯•é›†
 train_error=sum(abs(SamOut-NetOut))/length(SamOut);
 test_error=sum(abs(TargetOut-TestNNOut))/length(TargetOut);
 
-%  »æÖÆÑ§Ï°Îó²îÇúÏß
+%  ç»˜åˆ¶å­¦ä¹ è¯¯å·®æ›²çº¿
 figure
 hold on
 grid
